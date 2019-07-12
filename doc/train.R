@@ -27,7 +27,7 @@ ReLU <- function(m){
   return (r)
 }
 R_grad <- function(x){
-  return (ifelse(x <= 0, 0, x))
+  return (ifelse(x <= 0, 0, 1))
 }
 # 训练参数
 step = 1000 #步数
@@ -39,25 +39,26 @@ for (i in 1:step){
 # 前向传播
 middle = fx(A1 %*% rbind(1, input))
 output = fx(A2 %*% rbind(1, middle))
-cat("\nerr=", sqrt(norm(output-target)))
+cat("\nerr=", sqrt(norm(output-target)), "\n")
+
 # 反向传播
-g = df(output)
-diff = (output-target)* g * middle
-cat("\nstep=", i); print(diff)
+
 # 梯度下降
 alpha = 0.5
 B1=A1; B2=A2
 
+# 倒数第一层
+diff = (output-target) * df(output) * middle
 B2[1, 2:3] = A2[1, 2:3] - alpha * diff[1]
 B2[2, 2:3] = A2[2, 2:3] - alpha * diff[2]
 # B2[, 2:3] = A2[, 2:3] - alpha * cbind(diff, diff)
 
-s = (output-target) * g
-grad = df(middle)
-B1[1, 2:3]=A1[1, 2:3] - alpha * (s[1] + s[2]) * A2[1, 2:3] * grad[1] * input[1]
-B1[2, 2:3]=A1[2, 2:3] - alpha * (s[1] + s[2]) * A2[2, 2:3] * grad[2] * input[2]
-# temp = grad * input
-# B1[, 2:3]=A1[, 2:3] - alpha * (s[1] + s[2]) * A2[, 2:3] * cbind(temp,temp)
+# 倒数第二层
+s = (output-target) * df(output)
+diff = (output-target) * df(output) * df(middle) * input
+B1[1, 2:3]=A1[1, 2:3] - alpha * sum(s) * A2[1, 2:3] * diff[1]
+B1[2, 2:3]=A1[2, 2:3] - alpha * sum(s) * A2[2, 2:3] * diff[2]
+# B1[, 2:3]=A1[, 2:3] - alpha * sum(s) * A2[, 2:3] * cbind(diff, diff)
 
 A1=B1; A2=B2
 }
