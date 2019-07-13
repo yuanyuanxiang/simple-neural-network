@@ -1,10 +1,15 @@
-function [Train, Label] = loadMNIST(train_file, label_file)
+function [Train, Label] = loadMNIST(train_file, label_file, force)
 % MNIST数据读取与保存.
 % train_file = '../data/train-images.idx3-ubyte';
 % label_file = '../data/train-labels.idx1-ubyte';
 % 返回时将矩阵转置，即矩阵的每一列是一个结果.
+% 如果第3个参数输入force为true，则强制从文件读取数据.
 
-if ~exist('train-images.mat', 'file')
+if nargin < 3
+    force = false;
+end
+
+if ~exist('train-images.mat', 'file') || force
     FID = fopen(train_file, 'rb');
     if FID == -1
         Train = [];
@@ -29,12 +34,15 @@ if ~exist('train-images.mat', 'file')
     % Convert to double and rescale to [0,1]
     % https://blog.csdn.net/weixin_41503009/article/details/83420189
     Train = double(Train) * (0.999 / 255) + 0.001;
-    save('train-images.mat', 'Train');
+    if ~force
+        save('train-images.mat', 'Train');
+    end
 else
+    % 已存在mat格式文件，则直接加载
     load('train-images.mat');
 end
 
-if ~exist('train-labels.mat', 'file')
+if ~exist('train-labels.mat', 'file') || force
     FID = fopen(label_file,'r');
     if FID == -1
         Train = [];
@@ -42,19 +50,24 @@ if ~exist('train-labels.mat', 'file')
         fprintf('File [%s] does not exist.\n', label_file);
         return
     end
-    MagicNumber=readint32(FID);
+    magic=readint32(FID);
+    assert(magic == 2049, ['Bad magic number in ', train_file, '']);
     NumberofImages=readint32(FID);
-    
+    assert(NumberofImages == size(Train, 2));
     Label = zeros(NumberofImages,10);
     for i = 1:NumberofImages
         temp = fread(FID,1);
         Label(i,temp+1) = 1;
     end
+    
     fclose(FID);
     Label = Label';
     Label(Label==0) = 0.001;
-    save('train-labels.mat','Label');
+    if ~force
+        save('train-labels.mat','Label');
+    end
 else
+    % 已存在mat格式文件，则直接加载
     load('train-labels.mat');
 end
 end

@@ -9,15 +9,16 @@ clear;clc;
 train_file = '../data/train-images.idx3-ubyte';
 label_file = '../data/train-labels.idx1-ubyte';
 [Train, Label] = loadMNIST(train_file, label_file);
-if isempty(Train)
+if isempty(Train) || isempty(Label)
     return
 end
 
-sz = size(Train, 1);
-n = 28;
-t = size(Label, 1);
+sz = size(Train, 1);    %第一层神经元个数
+n = 28;                 %第二层神经元个数
+t = size(Label, 1);     %第三层神经元个数
 
 %{
+% 测试数据
 sz = 2;
 n = 2;
 t = 2;
@@ -27,9 +28,10 @@ Label = [0.01, 0.99]';
 
 %% 初始值
 alpha = 1e-2; % 学习率
-iter = 40; % 迭代次数
-b1 = 0.35; b2 = 0.60;
+iter = 60; % 迭代次数
+b1 = 0.35; b2 = 0.60; % 偏置量
 if exist('Matrix1.mat', 'file') && exist('Matrix2.mat', 'file')
+    % 从上一次的结果继续训练
     load('Matrix1.mat');
     load('Matrix2.mat');
     if exist('Loss.mat', 'file')
@@ -38,6 +40,7 @@ if exist('Matrix1.mat', 'file') && exist('Matrix2.mat', 'file')
         Loss = [];
     end
 else
+    % 从头开始训练
     A1 = [ones(n, 1), rand(n, sz)] - 0.5;
     A2 = [ones(t, 1), rand(t, n)] - 0.5;
     Loss = [];
@@ -58,10 +61,11 @@ for i = 1:iter
         % 前向传播
         middle = reLU(A1 * [1; In]); % 中间层/隐藏层
         output = reLU(A2 * [1; middle]); % 输出层
+        err = output - Out;
         
         B1=A1; B2=A2;
         % BP-误差反向传播
-        err1 = output - Out;
+        err1 = err;
         diff = (err1 .* Grad(output)) * middle';
         B2(:, 2:end) = A2(:, 2:end) - alpha * diff;
         
@@ -70,7 +74,7 @@ for i = 1:iter
         B1(:, 2:end) = A1(:, 2:end) - alpha * diff;
         
         A1=B1; A2=B2;
-        total = total + norm(err1);
+        total = total + norm(err);
     end
     errs(i) = total / num;
     fprintf('i=%g err=%g using=%gs rate=%g\n', i, errs(i), toc, alpha);

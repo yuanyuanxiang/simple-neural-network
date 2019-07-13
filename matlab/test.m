@@ -3,7 +3,7 @@ clc;
 train_file = '../data/train-images.idx3-ubyte';
 label_file = '../data/train-labels.idx1-ubyte';
 [Train, Label] = loadMNIST(train_file, label_file);
-if isempty(Train)
+if isempty(Train) || isempty(Label)
     return
 end
 
@@ -11,6 +11,9 @@ end
 if exist('Matrix1.mat', 'file') && exist('Matrix2.mat', 'file')
     load('Matrix1.mat');
     load('Matrix2.mat');
+else
+    fprintf('File [Matrix1.mat] or [Matrix2.mat] does not exist.\n');
+    return
 end
 
 %% ≤‚ ‘
