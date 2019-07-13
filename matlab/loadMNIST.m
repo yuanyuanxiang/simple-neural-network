@@ -5,25 +5,31 @@ function [Train, Label] = loadMNIST(train_file, label_file)
 % 返回时将矩阵转置，即矩阵的每一列是一个结果.
 
 if ~exist('train-images.mat', 'file')
-    FID = fopen(train_file,'r');
+    FID = fopen(train_file, 'rb');
     if FID == -1
         Train = [];
         Label = [];
         fprintf('File [%s] does not exist.\n', train_file);
         return
     end
-    MagicNumber=readint32(FID);
-    NumberofImages=readint32(FID);
-    rows=readint32(FID);
-    colums=readint32(FID);
+    magic = fread(FID, 1, 'int32', 0, 'ieee-be');
+    assert(magic == 2051, ['Bad magic number in ', train_file, '']);
     
-    Train = zeros(NumberofImages,rows*colums);
-    for i = 1:NumberofImages
-        temp = fread(FID,(rows*colums), 'uchar');
-        Train(i,:) = temp';
-    end
-    Train = Train';
-    save('train-images.mat','Train');
+    numImages = fread(FID, 1, 'int32', 0, 'ieee-be');
+    numRows = fread(FID, 1, 'int32', 0, 'ieee-be');
+    numCols = fread(FID, 1, 'int32', 0, 'ieee-be');
+    
+    Train = fread(FID, inf, 'unsigned char');
+    Train = reshape(Train, numCols, numRows, numImages);
+    Train = permute(Train,[2 1 3]);
+    
+    fclose(FID);
+    % Reshape to #pixels x #examples
+    Train = reshape(Train, size(Train, 1) * size(Train, 2), size(Train, 3));
+    % Convert to double and rescale to [0,1]
+    % https://blog.csdn.net/weixin_41503009/article/details/83420189
+    Train = double(Train) * (0.999 / 255) + 0.001;
+    save('train-images.mat', 'Train');
 else
     load('train-images.mat');
 end
@@ -44,7 +50,9 @@ if ~exist('train-labels.mat', 'file')
         temp = fread(FID,1);
         Label(i,temp+1) = 1;
     end
+    fclose(FID);
     Label = Label';
+    Label(Label==0) = 0.001;
     save('train-labels.mat','Label');
 else
     load('train-labels.mat');
@@ -61,10 +69,3 @@ end
 getdata = bin2dec(data);
 
 end
-
-%{
-作者：东泰山
-来源：CSDN
-原文：https://blog.csdn.net/u010936286/article/details/80667138
-版权声明：本文为博主原创文章，转载请附上博文链接！
-%}
