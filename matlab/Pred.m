@@ -12,5 +12,5 @@ hidden = reLU(A1 * [1; In]);
 r = reLU(A2 * [1; hidden]);
 [s, p] = max(r);
 p = p - 1;
-fprintf('该图片为数字[%g],准确度%g\n', p, s);
+
 end
