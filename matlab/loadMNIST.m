@@ -2,47 +2,52 @@ function [Train, Label] = loadMNIST(train_file, label_file)
 % MNIST数据读取与保存.
 % train_file = '../data/train-images.idx3-ubyte';
 % label_file = '../data/train-labels.idx1-ubyte';
+% 返回时将矩阵转置，即矩阵的每一列是一个结果.
 
-if ~exist('train.mat')
+if ~exist('train-images.mat', 'file')
     FID = fopen(train_file,'r');
     if FID == -1
-        Train = []
-        Label = []
+        Train = [];
+        Label = [];
+        fprintf('File [%s] does not exist.\n', train_file);
         return
     end
     MagicNumber=readint32(FID);
     NumberofImages=readint32(FID);
     rows=readint32(FID);
     colums=readint32(FID);
-
+    
     Train = zeros(NumberofImages,rows*colums);
     for i = 1:NumberofImages
         temp = fread(FID,(rows*colums), 'uchar');
         Train(i,:) = temp';
     end
-    save('train.mat','Train')
+    Train = Train';
+    save('train-images.mat','Train');
 else
-    load('train.mat')
+    load('train-images.mat');
 end
 
-if ~exist('Label.mat')
+if ~exist('train-labels.mat', 'file')
     FID = fopen(label_file,'r');
     if FID == -1
-        Train = []
-        Label = []
+        Train = [];
+        Label = [];
+        fprintf('File [%s] does not exist.\n', label_file);
         return
     end
     MagicNumber=readint32(FID);
     NumberofImages=readint32(FID);
-
+    
     Label = zeros(NumberofImages,10);
     for i = 1:NumberofImages
         temp = fread(FID,1);
         Label(i,temp+1) = 1;
     end
-    save('label.mat','Label')
+    Label = Label';
+    save('train-labels.mat','Label');
 else
-    load('Label.mat')
+    load('train-labels.mat');
 end
 end
 
