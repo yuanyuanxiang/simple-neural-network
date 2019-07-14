@@ -23,13 +23,13 @@ end
 % 各层神经元数量
 sz = size(Train, 1);    %第一层神经元个数
 n = 28;                 %第二层神经元个数
-t = size(Label, 1);     %第三层神经元个数
+m = size(Label, 1);     %第三层神经元个数
 
 %{
 % 一个简单的测试数据：对本项目python问题的求解
 sz = 2;
 n = 2;
-t = 2;
+m = 2;
 Train = [0.05, 0.10]';
 Label = [0.01, 0.99]';
 Test = [];
@@ -39,7 +39,7 @@ Tag = [];
 %% 初始值
 alpha = 1e-2; % 初始学习率
 iter = 1000; % 迭代次数
-[A1, A2, Loss] = TrainRecovery(sz, n, t);% 恢复训练
+[A1, A2, Loss] = TrainRecovery(sz, n, m);% 恢复训练
 start = size(Loss, 2);
 fprintf('从第[%g]步开始迭代.\n', start);
 p = alpha * 0.99^start;
@@ -56,7 +56,7 @@ for i = 1:iter
     tic;
     alpha = lr(i);
     % 总误差
-    total = zeros(num, 1);
+    total = zeros(m, num);
     for k = 1 : num % 遍历元素
         In = Train(:, k);
         Out = Label(:, k);
@@ -76,9 +76,9 @@ for i = 1:iter
         B1(:, 2:end) = A1(:, 2:end) - alpha * diff;
         
         A1=B1; A2=B2;
-        total(k) = norm(err);
+        total(:, k) = err;
     end
-    e = mean(total);
+    e = mean(sqrt(sum(total.*total)));
     s = Accuracy(A1, A2, Train, Label);
     t = Accuracy(A1, A2, Test, Tag);
     errs(1, i) = e; errs(2, i) = s; errs(3, i) = t;
