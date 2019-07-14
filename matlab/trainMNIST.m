@@ -3,6 +3,7 @@
 % 隐藏层：n个神经元，假设n=28
 % 输出层：10个神经元，代表输入的图片属于是哪个数字
 % 网络：Out = Sigmoid(A2 * Sigmoid(A1*In))
+% 袁沅祥，2019-7
 
 clear;clc;
 %% MNIST数据读取与保存.
@@ -12,49 +13,50 @@ label_file = '../data/train-labels.idx1-ubyte';
 if isempty(Train) || isempty(Label)
     return
 end
+test_file = '../test/t10k-images.idx3-ubyte';
+test_label = '../test/t10k-labels.idx1-ubyte';
+[Test, Tag] = loadMNIST(test_file, test_label, true);
+if isempty(Test) || isempty(Tag)
+    return
+end
 
+% 各层神经元数量
 sz = size(Train, 1);    %第一层神经元个数
 n = 28;                 %第二层神经元个数
 t = size(Label, 1);     %第三层神经元个数
 
 %{
-% 测试数据
+% 一个简单的测试数据：对本项目python问题的求解
 sz = 2;
 n = 2;
 t = 2;
 Train = [0.05, 0.10]';
 Label = [0.01, 0.99]';
+Test = [];
+Tag = [];
 %}
 
 %% 初始值
-alpha = 1e-2; % 学习率
-iter = 60; % 迭代次数
+alpha = 1e-2; % 初始学习率
+iter = 1000; % 迭代次数
+[A1, A2, Loss] = TrainRecovery(sz, n, t);% 恢复训练
+start = size(Loss, 2);
+fprintf('从第[%g]步开始迭代.\n', start);
+p = alpha * 0.99^start;
+lr = p * 0.99.^(0:iter); % 学习率随迭代次数衰减
 b1 = 0.35; b2 = 0.60; % 偏置量
-if exist('Matrix1.mat', 'file') && exist('Matrix2.mat', 'file')
-    % 从上一次的结果继续训练
-    load('Matrix1.mat');
-    load('Matrix2.mat');
-    if exist('Loss.mat', 'file')
-        load('Loss.mat');
-    else
-        Loss = [];
-    end
-else
-    % 从头开始训练
-    A1 = [ones(n, 1), rand(n, sz)] - 0.5;
-    A2 = [ones(t, 1), rand(t, n)] - 0.5;
-    Loss = [];
-end
 
 %profile on;
 %profile clear;
 %% 开始迭代
 num = size(Train, 2);
-errs = zeros(1, iter);
+% 第一行存放误差，第二、三行存放准确率
+errs = zeros(3, iter);
 for i = 1:iter
     tic;
+    alpha = lr(i);
     % 总误差
-    total = 0;
+    total = zeros(num, 1);
     for k = 1 : num % 遍历元素
         In = Train(:, k);
         Out = Label(:, k);
@@ -74,15 +76,16 @@ for i = 1:iter
         B1(:, 2:end) = A1(:, 2:end) - alpha * diff;
         
         A1=B1; A2=B2;
-        total = total + norm(err);
+        total(k) = norm(err);
     end
-    errs(i) = total / num;
-    fprintf('i=%g err=%g using=%gs rate=%g\n', i, errs(i), toc, alpha);
+    e = mean(total);
+    s = Accuracy(A1, A2, Train, Label);
+    t = Accuracy(A1, A2, Test, Tag);
+    errs(1, i) = e; errs(2, i) = s; errs(3, i) = t;
+    % 保存权重
+    if t >= 0
+        Loss = SaveResult(A1, A2, Loss, errs, i, 10);
+    end
+    fprintf('%g err=%g lr=%g acc=%g %g use %gs\n',i+start,e,alpha,s,t,toc);
 end
-%% 更新网络权重和残差
-save('Matrix1.mat','A1');
-save('Matrix2.mat','A2');
-Loss = [Loss, errs];
-save('Loss.mat','Loss');
-plot(Loss);
 %profile viewer;

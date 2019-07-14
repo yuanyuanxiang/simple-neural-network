@@ -1,5 +1,11 @@
 %% score: 计算该模型在测试集上的准确率.
 clc;
+train_file = '../data/train-images.idx3-ubyte';
+label_file = '../data/train-labels.idx1-ubyte';
+[Train, Label] = loadMNIST(train_file, label_file);
+if isempty(Train) || isempty(Label)
+    return
+end
 test_file = '../test/t10k-images.idx3-ubyte';
 test_label = '../test/t10k-labels.idx1-ubyte';
 [Test, Tag] = loadMNIST(test_file, test_label, true);
@@ -16,16 +22,10 @@ else
     return
 end
 %% 计算准确率
-num = size(Test, 2);
-s = 0;
-for i = 1:num
-    In = Test(:, i);
-    hidden = reLU(A1 * [1; In]);
-    r = reLU(A2 * [1; hidden]);
-    [~, p] = max(r);
-    [~, tag] = max(Tag(:, i));
-    if p == tag
-        s = s + 1;
-    end
-end
-fprintf('测试集个数：%g 准确率：%g.\n', num, s/num);
+tic;
+s = Accuracy(A1, A2, Train, Label);
+fprintf('训练集准确率：%g using %gs.\n', s, toc);
+
+tic;
+s = Accuracy(A1, A2, Test, Tag);
+fprintf('测试集准确率：%g using %gs.\n', s, toc);

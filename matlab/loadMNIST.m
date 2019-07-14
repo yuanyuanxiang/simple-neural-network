@@ -4,6 +4,7 @@ function [Train, Label] = loadMNIST(train_file, label_file, force)
 % label_file = '../data/train-labels.idx1-ubyte';
 % 返回时将矩阵转置，即矩阵的每一列是一个结果.
 % 如果第3个参数输入force为true，则强制从文件读取数据.
+% 该函数参考了互联网上现有代码，包括多个来源，未指明具体作者.
 
 if nargin < 3
     force = false;
