@@ -14,13 +14,8 @@ if isempty(Test) || isempty(Tag)
 end
 
 %% 加载网络
-if exist('Matrix1.mat', 'file') && exist('Matrix2.mat', 'file')
-    load('Matrix1.mat');
-    load('Matrix2.mat');
-else
-    fprintf('File [Matrix1.mat] or [Matrix2.mat] does not exist.\n');
-    return
-end
+[A1, A2, Loss] = TrainRecovery(28*28, 28, 10);
+
 %% 计算准确率
 tic;
 s = Accuracy(A1, A2, Train, Label);
