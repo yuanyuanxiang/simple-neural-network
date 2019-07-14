@@ -14,7 +14,7 @@ if isempty(Test) || isempty(Tag)
 end
 
 %% 加载网络
-[A1, A2, Loss] = TrainRecovery(28*28, 28, 10);
+[A1, A2, Loss] = LoadNN(28*28, 10);
 
 %% 计算准确率
 tic;

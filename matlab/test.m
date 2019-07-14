@@ -8,7 +8,7 @@ if isempty(Test) || isempty(Tag)
 end
 
 %% ¼ÓÔØÍøÂç
-[A1, A2, Loss] = TrainRecovery(28*28, 28, 10);
+[A1, A2, Loss] = LoadNN(28*28, 10);
 
 %% ²âÊÔ
 k = 8;

@@ -17,7 +17,7 @@ end
 %% »æÖÆ
 figure(1);
 subplot(1, 2, 1);
-plot(Loss(1, :));
+plot(Loss(1, :), '-b');
 title('loss');
 figure(1);
 subplot(1, 2, 2);
@@ -25,6 +25,6 @@ plot(Loss(2, :), '-r+');
 hold on;
 plot(Loss(3, :), '-b*');
 title('acc');
-legend('train', 'test');
+legend('train', 'test', 'Location', 'SouthEast');
 pause(1);
 end
