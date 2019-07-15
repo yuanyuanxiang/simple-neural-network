@@ -10,7 +10,9 @@ if s1 > 2 && ~isempty(m1) && ~isempty(m2)
     % 加载已训练的神经网络
     load(m1(end).name);
     load(m2(end).name);
-    assert((size(A1,2)==(s1+1)) && (size(A2,1)==s3));
+    if datenum(version('-date')) > datenum('Jan 01, 2013')
+        assert((size(A1,2)==(s1+1)) && (size(A2,1)==s3));
+    end
     fprintf('Load [%s] and [%s] succeed.\n', m1(end).name, m2(end).name);
     if exist('Loss.mat', 'file')
         load('Loss.mat');

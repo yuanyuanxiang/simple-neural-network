@@ -14,7 +14,8 @@ end
 num = size(Test, 2);
 Hidden = reLU(A1 * [ones(1, num); Test]);
 Output = reLU(A2 * [ones(1, size(Hidden, 2)); Hidden]);
-[~, p] = max(Output);
-[~, tag] = max(Tag);
+[a, p] = max(Output);
+[b, tag] = max(Tag);
 s = sum(p == tag);
 s = s / num;
+end

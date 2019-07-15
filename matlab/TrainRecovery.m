@@ -4,7 +4,10 @@ function [A1, A2, Loss] = TrainRecovery(s1, s2, s3)
 % s1为输入,s2为隐藏层,s3为输出.
 % 返回网络权重A1, A2 和 Loss.
 
-assert(nargin == 3);
+if datenum(version('-date')) > datenum('Jan 01, 2013')
+    assert(nargin == 3);
+end
+
 [A1, A2, Loss] = LoadNN(s1, s3);
 
 if isempty(A1) || isempty(A2)

@@ -12,7 +12,12 @@ end
 
 %% 测试
 k = 8;
-n = randperm(size(Test, 2), k * k);
+if datenum(version('-date')) > datenum('Jan 01, 2013')
+    n = randperm(size(Test, 2), k * k);
+else
+    a = randperm(size(Test, 2));
+    n = a(1 : (k * k));
+end
 count = 1;
 right = 0;
 
@@ -24,7 +29,7 @@ for i = 1:k
         xlabel(num2str(p));
         ylabel(num2str(s));
         fprintf('图片%g为数字[%g],准确度%g\n', n(count), p, s);
-        [~, tag] = max(Tag(:, n(count)));
+        [a, tag] = max(Tag(:, n(count)));
         if tag-1 == p
             right = right + 1;
         end

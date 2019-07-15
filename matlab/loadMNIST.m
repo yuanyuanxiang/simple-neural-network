@@ -10,6 +10,9 @@ if nargin < 3
     force = false;
 end
 
+VERSION = datenum(version('-date'));
+r2013a = datenum('Jan 01, 2013');
+
 if ~exist('train-images.mat', 'file') || force
     FID = fopen(train_file, 'rb');
     if FID == -1
@@ -19,16 +22,18 @@ if ~exist('train-images.mat', 'file') || force
         return
     end
     magic = fread(FID, 1, 'int32', 0, 'ieee-be');
-    assert(magic == 2051, ['Bad magic number in ', train_file, '']);
-    
+    if VERSION > r2013a
+        assert(magic == 2051, ['Bad magic number in ', train_file, '']);
+    end
+
     numImages = fread(FID, 1, 'int32', 0, 'ieee-be');
     numRows = fread(FID, 1, 'int32', 0, 'ieee-be');
     numCols = fread(FID, 1, 'int32', 0, 'ieee-be');
-    
+
     Train = fread(FID, inf, 'unsigned char');
     Train = reshape(Train, numCols, numRows, numImages);
     Train = permute(Train,[2 1 3]);
-    
+
     fclose(FID);
     % Reshape to #pixels x #examples
     Train = reshape(Train, size(Train, 1) * size(Train, 2), size(Train, 3));
@@ -52,15 +57,17 @@ if ~exist('train-labels.mat', 'file') || force
         return
     end
     magic=readint32(FID);
-    assert(magic == 2049, ['Bad magic number in ', train_file, '']);
     NumberofImages=readint32(FID);
-    assert(NumberofImages == size(Train, 2));
+    if VERSION > r2013a
+        assert(magic == 2049, ['Bad magic number in ', train_file, '']);
+        assert(NumberofImages == size(Train, 2));
+    end
     Label = zeros(NumberofImages,10);
     for i = 1:NumberofImages
         temp = fread(FID,1);
         Label(i,temp+1) = 1;
     end
-    
+
     fclose(FID);
     Label = Label';
     Label(Label==0) = 0.001;
