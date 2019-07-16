@@ -39,7 +39,8 @@ for (i in 1:step){
 # 前向传播
 middle = fx(A1 %*% rbind(1, input))
 output = fx(A2 %*% rbind(1, middle))
-cat("\nerr=", sqrt(norm(output-target)), "\n")
+err = output - target
+cat("\nerr=", norm(err, "2"), "\n")
 
 # 反向传播
 
@@ -48,17 +49,14 @@ alpha = 0.5
 B1=A1; B2=A2
 
 # 倒数第一层
-diff = (output-target) * df(output) * middle
-B2[1, 2:3] = A2[1, 2:3] - alpha * diff[1]
-B2[2, 2:3] = A2[2, 2:3] - alpha * diff[2]
-# B2[, 2:3] = A2[, 2:3] - alpha * cbind(diff, diff)
+err1 = err
+diff = (err1 * df(output)) %*% t(middle)
+B2[, 2:3] = A2[, 2:3] - alpha * diff
 
 # 倒数第二层
-s = (output-target) * df(output)
-diff = (output-target) * df(output) * df(middle) * input
-B1[1, 2:3]=A1[1, 2:3] - alpha * sum(s) * A2[1, 2:3] * diff[1]
-B1[2, 2:3]=A1[2, 2:3] - alpha * sum(s) * A2[2, 2:3] * diff[2]
-# B1[, 2:3]=A1[, 2:3] - alpha * sum(s) * A2[, 2:3] * cbind(diff, diff)
+err2 = t(B2[, 2:3]) %*% err1
+diff = (err2 * df(middle)) %*% t(input)
+B1[, 2:3] = A1[, 2:3] - alpha * diff
 
 A1=B1; A2=B2
 }

@@ -2,3 +2,5 @@
 *.idx3-ubyte
 *.idx1-ubyte
 *.asv
+*.mat
+.vs/Newton/v14/.suo

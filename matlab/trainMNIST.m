@@ -8,6 +8,7 @@
 % n=56，训练40次，精度达到96.5+-0.3%
 % n=84，训练40次，精度达到97.2%
 % n=112，训练40次，精度达到97.6%
+
 clear;clc;
 %% MNIST数据读取与保存.
 train_file = '../data/train-images.idx3-ubyte';
@@ -25,7 +26,7 @@ end
 
 % 各层神经元数量
 sz = size(Train, 1);    %第一层神经元个数
-n = 112;                 %第二层神经元个数
+n = 28;                 %第二层神经元个数
 m = size(Label, 1);     %第三层神经元个数
 
 %{
@@ -43,11 +44,11 @@ Tag = [];
 alpha = 1e-2; % 初始学习率
 iter = 1000; % 迭代次数
 [A1, A2, Loss] = TrainRecovery(sz, n, m);% 恢复训练
-start = size(Loss, 2);
+start = size(Loss, 2); % 上一次迭代次数
 fprintf('从第[%g]步开始迭代.\n', start);
 p = alpha * 0.99^start;
 lr = p * 0.99.^(0:iter); % 学习率随迭代次数衰减
-b1 = 0.35; b2 = 0.60; % 偏置量
+b1 = 0.35; b2 = 0.60; % 偏置量,本模型假设偏置量都一样了
 
 %profile on;
 %profile clear;

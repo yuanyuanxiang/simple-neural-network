@@ -20,6 +20,7 @@ if s1 > 2 && ~isempty(m1) && ~isempty(m2)
         Loss = [];
     end
 else
+    fprintf('Load Neural Networks failed.\n');
     A1 = [];
     A2 = [];
     Loss = [];
