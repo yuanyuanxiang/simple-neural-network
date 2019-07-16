@@ -26,7 +26,7 @@ end
 
 % 各层神经元数量
 sz = size(Train, 1);    %第一层神经元个数
-n = 28;                 %第二层神经元个数
+n = 70;                 %第二层神经元个数
 m = size(Label, 1);     %第三层神经元个数
 
 %{
@@ -48,7 +48,6 @@ start = size(Loss, 2); % 上一次迭代次数
 fprintf('从第[%g]步开始迭代.\n', start);
 p = alpha * 0.99^start;
 lr = p * 0.99.^(0:iter); % 学习率随迭代次数衰减
-b1 = 0.35; b2 = 0.60; % 偏置量,本模型假设偏置量都一样了
 
 %profile on;
 %profile clear;
@@ -62,25 +61,25 @@ for i = 1:iter
     % 总误差
     total = zeros(m, num);
     for k = 1 : num % 遍历元素
-        In = Train(:, k);
-        Out = Label(:, k);
+        input = Train(:, k); % 输入值
+        target = Label(:, k); % 预期值
         % 前向传播
-        middle = reLU(A1 * [1; In]); % 中间层/隐藏层
+        middle = reLU(A1 * [1; input]); % 中间层/隐藏层
         output = reLU(A2 * [1; middle]); % 输出层
-        err = output - Out;
         
         B1=A1; B2=A2;
         % BP-误差反向传播
-        err1 = err;
-        diff = (err1 .* Grad(output)) * middle';
-        B2(:, 2:end) = A2(:, 2:end) - alpha * diff;
+        err = output - target;
+        temp = err .* Grad(output);
+        B2 = A2 - alpha * temp * [1; middle]';
         
-        err2 = B2(:, 2:end)' * err1;
-        diff = (err2 .* Grad(middle)) * In';
-        B1(:, 2:end) = A1(:, 2:end) - alpha * diff;
+        total(:, k) = err;
+        
+        err = A2(:, 2:end)' * temp;
+        temp = err .* Grad(middle);
+        B1 = A1 - alpha * temp * [1; input]';
         
         A1=B1; A2=B2;
-        total(:, k) = err;
     end
     e = mean(sqrt(sum(total.*total)));
     s = Accuracy(A1, A2, Train, Label);

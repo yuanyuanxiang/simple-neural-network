@@ -12,8 +12,11 @@ end
 
 if isempty(A1) || isempty(A2)
     % 从头开始训练
-    A1 = [ones(s2, 1), rand(s2, s1)] - 0.5;
-    A2 = [ones(s3, 1), rand(s3, s2)] - 0.5;
+    b1 = 0.35; b2 = 0.60; % 偏置量
+    A1 = rand(s2, s1 + 1) - 0.5;
+    A2 = rand(s3, s2 + 1) - 0.5;
+    %A1(:, 1) = b1;
+    %A2(:, 1) = b2;
     Loss = [];
 end
 end
