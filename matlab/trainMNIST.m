@@ -66,20 +66,18 @@ for i = 1:iter
         % 前向传播
         middle = reLU(A1 * [1; input]); % 中间层/隐藏层
         output = reLU(A2 * [1; middle]); % 输出层
-        
+        err = output - target;
+
         B1=A1; B2=A2;
         % BP-误差反向传播
-        err = output - target;
-        temp = err .* Grad(output);
-        B2 = A2 - alpha * temp * [1; middle]';
-        
-        total(:, k) = err;
-        
-        err = A2(:, 2:end)' * temp;
-        temp = err .* Grad(middle);
-        B1 = A1 - alpha * temp * [1; input]';
-        
+        err2 = err .* Grad(output);
+        B2 = A2 - alpha * err2 * [1; middle]';
+
+        err1 = (A2(:, 2:end)' * err2) .* Grad(middle);
+        B1 = A1 - alpha * err1 * [1; input]';
+
         A1=B1; A2=B2;
+        total(:, k) = err;
     end
     e = mean(sqrt(sum(total.*total)));
     s = Accuracy(A1, A2, Train, Label);
