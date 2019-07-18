@@ -49,14 +49,12 @@ alpha = 0.5
 B1=A1; B2=A2
 
 # 倒数第一层
-err1 = err
-diff = (err1 * df(output)) %*% t(middle)
-B2[, 2:3] = A2[, 2:3] - alpha * diff
+err2 = err * df(output)
+B2 = A2 - alpha * err2 %*% cbind(1, t(middle))
 
 # 倒数第二层
-err2 = t(B2[, 2:3]) %*% err1
-diff = (err2 * df(middle)) %*% t(input)
-B1[, 2:3] = A1[, 2:3] - alpha * diff
+err1 = t(B2[, 2:3]) %*% err2 * df(middle)
+B1 = A1 - alpha * err1 %*% cbind(1, t(input))
 
 A1=B1; A2=B2
 }
